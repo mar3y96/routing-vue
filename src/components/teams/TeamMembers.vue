@@ -2,13 +2,9 @@
   <section>
     <h2>{{ teamName }}</h2>
     <ul>
-      <user-item
-        v-for="member in members"
-        :key="member.id"
-        :name="member.fullName"
-        :role="member.role"
-      ></user-item>
+      <user-item v-for="member in members" :key="member.id" :name="member.fullName" :role="member.role"></user-item>
     </ul>
+    <router-link to="/teams/t2">to team 2</router-link>
   </section>
 </template>
 
@@ -19,15 +15,44 @@ export default {
   components: {
     UserItem
   },
+  props:['teamId'],
+  beforeRouteUpdate(to,_,next){
+   console.log(to);
+    next()
+  },
+  watch: {
+    teamId(newValue) {
+      this.loadTeam(newValue)
+    }
+  },
+  inject: ['users', 'teams'],
+  // props:['teamId'],
   data() {
     return {
-      teamName: 'Test',
-      members: [
-        { id: 'u1', fullName: 'Max Schwarz', role: 'Engineer' },
-        { id: 'u2', fullName: 'Max Schwarz', role: 'Engineer' },
-      ],
+      teamName: '',
+      members: [],
     };
+  }, methods: {
+    loadTeam(teamId) {
+     
+      console.log(this.$route.query);
+      const selectedTeam = this.teams.find((team) => team.id == teamId)
+      const members = selectedTeam.members;
+      const selectedMembers = [];
+      for (const member of members) {
+        const selectedUsers = this.users.find((user) => user.id == member)
+        // console.log(member);
+        selectedMembers.push(selectedUsers)
+      }
+      this.members = selectedMembers;
+      this.teamName = selectedTeam.name
+    }
   },
+
+  created() {
+    this.loadTeam(this.teamId)
+    
+  }
 };
 </script>
 
